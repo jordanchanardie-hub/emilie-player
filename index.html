@@ -337,7 +337,40 @@ async function lancerLecture(type, id) {
     const deviceId = await getDeviceIdCible();
     if (!deviceId) return;
 
-    const uri = `spotify:${type}:${id}`;
+    let body;
+
+    if (type === "show") {
+        // Récupération des épisodes du podcast
+        const responseShow = await fetch(
+            `https://api.spotify.com/v1/shows/${id}/episodes?limit=1`,
+            {
+                headers: {
+                    Authorization: "Bearer " + token
+                }
+            }
+        );
+
+        const dataShow = await responseShow.json();
+
+        if (!dataShow.items || dataShow.items.length === 0) {
+            log("Aucun épisode trouvé.");
+            return;
+        }
+
+        const premierEpisodeUri = dataShow.items[0].uri;
+
+        body = {
+            uris: [premierEpisodeUri],
+            position_ms: 0
+        };
+    } else {
+        // Playlist / album
+        body = {
+            context_uri: `spotify:${type}:${id}`,
+            offset: { position: 0 },
+            position_ms: 0
+        };
+    }
 
     const response = await fetch(
         `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
@@ -347,17 +380,13 @@ async function lancerLecture(type, id) {
                 Authorization: "Bearer " + token,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ context_uri: uri })
+            body: JSON.stringify(body)
         }
     );
 
-    log("Lecture : " + uri + " / statut " + response.status);
-
-    if (response.status === 404) {
-        log("Erreur 404 : appareil non prêt. Relance Spotify sur la tablette, joue une musique quelques secondes, puis réessaie.");
-    }
+    log("Lecture lancée - statut : " + response.status);
 }
-
+    
 async function pauseSpotify() {
     const token = await getToken();
     if (!token) return;
