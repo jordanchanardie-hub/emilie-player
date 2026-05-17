@@ -357,30 +357,36 @@ async function lancerLecture(type, id) {
     let body;
 
     if (type === "show") {
-        // Récupération des épisodes du podcast
-        const responseShow = await fetch(
-            `https://api.spotify.com/v1/shows/${id}/episodes?limit=1`,
-            {
-                headers: {
-                    Authorization: "Bearer " + token
-                }
+    const responseShow = await fetch(
+        `https://api.spotify.com/v1/shows/${id}/episodes?limit=10&market=FR`,
+        {
+            headers: {
+                Authorization: "Bearer " + token
             }
-        );
-
-        const dataShow = await responseShow.json();
-
-        if (!dataShow.items || dataShow.items.length === 0) {
-            log("Aucun épisode trouvé.");
-            return;
         }
+    );
 
-        const premierEpisodeUri = dataShow.items[0].uri;
+    const dataShow = await responseShow.json();
 
-        body = {
-            uris: [premierEpisodeUri],
-            position_ms: 0
-        };
-    } else {
+    if (!responseShow.ok) {
+        log("Erreur récupération épisodes : " + JSON.stringify(dataShow));
+        return;
+    }
+
+    const episode = dataShow.items.find(e => e.is_playable);
+
+    if (!episode) {
+        log("Aucun épisode jouable trouvé pour ce show.");
+        return;
+    }
+
+    body = {
+        context_uri: episode.uri,
+        position_ms: 0
+    };
+
+    log("Épisode lancé : " + episode.name);
+} else {
         // Playlist / album
         body = {
             context_uri: `spotify:${type}:${id}`,
