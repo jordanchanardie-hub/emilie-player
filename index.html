@@ -88,6 +88,21 @@ body {
     margin-bottom: 12px;
 }
 
+.fallback-carte {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 24px;
+    background: #f1f1f1;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
 pre {
     background: #eee;
     padding: 10px;
@@ -407,20 +422,32 @@ async function afficherContenus() {
     grille.innerHTML = "";
 
     for (const item of contenus) {
-        const imageUrl = await recupererImage(item.type, item.id);
-
         const bouton = document.createElement("button");
         bouton.className = "carte";
         bouton.onclick = () => lancerLecture(item.type, item.id);
 
-        bouton.innerHTML = `
-            <img src="${imageUrl}" alt="${item.titre}">
-        `;
+        try {
+            const imageUrl = await recupererImage(item.type, item.id);
+
+            if (imageUrl) {
+                bouton.innerHTML = `
+                    <img src="${imageUrl}" alt="${item.titre}">
+                `;
+            } else {
+                bouton.innerHTML = `
+                    <div class="fallback-carte">${item.titre}</div>
+                `;
+            }
+        } catch (error) {
+            bouton.innerHTML = `
+                <div class="fallback-carte">${item.titre}</div>
+            `;
+            log("Erreur affichage " + item.titre + " : " + error.message);
+        }
 
         grille.appendChild(bouton);
     }
 }
-
 getToken().then(() => afficherContenus());
 </script>
 
