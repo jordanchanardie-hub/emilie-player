@@ -381,7 +381,7 @@ async function lancerLecture(type, id) {
     }
 
     body = {
-        context_uri: episode.uri,
+        uris: [episode.uri],
         position_ms: 0
     };
 
