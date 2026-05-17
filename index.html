@@ -44,7 +44,39 @@ body {
 
 .actions {
     max-width: 900px;
-    margin: 20px auto;
+    margin: 0 auto 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-discret {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 0;
+    background: #f1f1f1;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.btn-pause {
+    width: 120px;
+    height: 70px;
+    border-radius: 999px;
+    border: 0;
+    background: #1DB954;
+    color: white;
+    font-size: 34px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.btn-pause:active,
+.btn-discret:active {
+    transform: scale(0.94);
 }
 
 .actions button {
@@ -67,9 +99,17 @@ pre {
 <body>
 
 <div class="actions">
-    <button onclick="loginSpotify()">Connexion Spotify</button>
-    <button onclick="voirAppareils()">Voir appareils disponibles</button>
-    <button onclick="pauseSpotify()">Pause</button>
+    <button class="btn-discret" onclick="loginSpotify()" title="Connexion Spotify">
+        ♫
+    </button>
+
+    <button class="btn-pause" onclick="pauseSpotify()" title="Pause">
+        ⏸
+    </button>
+
+    <button class="btn-discret" onclick="voirAppareils()" title="Voir appareils disponibles">
+        ?
+    </button>
 </div>
 
 <div id="grille" class="grille"></div>
@@ -131,7 +171,7 @@ async function loginSpotify() {
         client_id: CLIENT_ID,
         scope: SCOPES,
         redirect_uri: REDIRECT_URI,
-        code_challenge_method: "S256",
+        code_challeunge_method: "S256",
         code_challenge: challenge
     });
 
