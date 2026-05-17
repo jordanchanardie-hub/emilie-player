@@ -249,7 +249,7 @@ async function getDeviceIdCible() {
     const token = await getToken();
     if (!token) return null;
 
-    const nomAppareilCible = "FRALAPQ525";
+    const nomAppareilCible = "B3-A40FHD";
 
     const response = await fetch("https://api.spotify.com/v1/me/player/devices", {
         headers: { Authorization: "Bearer " + token }
@@ -258,14 +258,14 @@ async function getDeviceIdCible() {
     const data = await response.json();
 
     if (!data.devices || data.devices.length === 0) {
-        log("Aucun appareil Spotify disponible. Ouvre Spotify sur FRALAPQ525, lance une musique, puis reviens ici.");
+        log("Aucun appareil Spotify disponible. Ouvre Spotify sur B3-A40FHD, lance une musique, puis reviens ici.");
         return null;
     }
 
     const cible = data.devices.find(device => device.name === nomAppareilCible);
 
     if (!cible) {
-        log("Appareil FRALAPQ525 introuvable.");
+        log("Appareil B3-A40FHD introuvable.");
         log("Appareils disponibles : " + data.devices.map(d => d.name).join(", "));
         return null;
     }
