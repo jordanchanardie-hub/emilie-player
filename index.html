@@ -101,9 +101,7 @@ pre {
 <body>
 
 <div class="actions">
-    <button class="btn-discret" onclick="loginSpotify()" title="Connexion Spotify">
-        ♫
-    </button>
+    <button class="btn-discret" onclick="resetSpotify()" title="Connexion Spotify">♫</button>
 
     <button class="btn-pause" onclick="pauseSpotify()" title="Pause">
         ⏸
@@ -112,6 +110,7 @@ pre {
     <button class="btn-discret" onclick="voirAppareils()" title="Voir appareils disponibles">
         ?
     </button>
+    
 </div>
 
 <div id="grille" class="grille"></div>
@@ -281,9 +280,26 @@ async function recupererImage(type, id) {
         headers: { Authorization: "Bearer " + token }
     });
 
+    if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        log("Session Spotify expirée. Clique à nouveau sur ♫ pour te reconnecter.");
+        return null;
+    }
+
     const data = await response.json();
 
+    if (!response.ok) {
+        log("Erreur image Spotify : " + JSON.stringify(data));
+        return null;
+    }
+
     return data.images?.[0]?.url || null;
+}
+
+function resetSpotify() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("code_verifier");
+    loginSpotify();
 }
 
 async function getDeviceIdCible() {
