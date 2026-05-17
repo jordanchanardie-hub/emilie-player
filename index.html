@@ -354,47 +354,28 @@ async function lancerLecture(type, id) {
     const deviceId = await getDeviceIdCible();
     if (!deviceId) return;
 
-    let body;
+    const uri = `spotify:${type}:${id}`;
 
-    if (type === "show") {
-    const responseShow = await fetch(
-        `https://api.spotify.com/v1/shows/${id}/episodes?limit=10&market=FR`,
-        {
-            headers: {
-                Authorization: "Bearer " + token
-            }
-        }
-    );
-
-    const dataShow = await responseShow.json();
-
-    if (!responseShow.ok) {
-        log("Erreur récupération épisodes : " + JSON.stringify(dataShow));
-        return;
-    }
-
-    const episode = dataShow.items.find(e => e.is_playable);
-
-    if (!episode) {
-        log("Aucun épisode jouable trouvé pour ce show.");
-        return;
-    }
-
-    body = {
-        uris: [episode.uri],
+    const body = {
+        context_uri: uri,
+        offset: { position: 0 },
         position_ms: 0
     };
 
-    log("Épisode lancé : " + episode.name);
-} else {
-        // Playlist / album
-        body = {
-            context_uri: `spotify:${type}:${id}`,
-            offset: { position: 0 },
-            position_ms: 0
-        };
-    }
+    const response = await fetch(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+        {
+            method: "PUT",
+            headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        }
+    );
 
+    log("Lecture : " + uri + " / statut " + response.status);
+}
     const response = await fetch(
         `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
         {
