@@ -205,22 +205,60 @@ async function recupererImage(type, id) {
     return data.images?.[0]?.url || null;
 }
 
+async function getDeviceIdCible() {
+    const token = await getToken();
+    if (!token) return null;
+
+    const nomAppareilCible = "FRALAPQ525";
+
+    const response = await fetch("https://api.spotify.com/v1/me/player/devices", {
+        headers: { Authorization: "Bearer " + token }
+    });
+
+    const data = await response.json();
+
+    if (!data.devices || data.devices.length === 0) {
+        log("Aucun appareil Spotify disponible. Ouvre Spotify sur FRALAPQ525, lance une musique, puis reviens ici.");
+        return null;
+    }
+
+    const cible = data.devices.find(device => device.name === nomAppareilCible);
+
+    if (!cible) {
+        log("Appareil FRALAPQ525 introuvable.");
+        log("Appareils disponibles : " + data.devices.map(d => d.name).join(", "));
+        return null;
+    }
+
+    log("Appareil cible trouvé : " + cible.name);
+    return cible.id;
+}
 async function lancerLecture(type, id) {
     const token = await getToken();
     if (!token) return;
 
+    const deviceId = await getDeviceIdCible();
+    if (!deviceId) return;
+
     const uri = `spotify:${type}:${id}`;
 
-    const response = await fetch("https://api.spotify.com/v1/me/player/play", {
-        method: "PUT",
-        headers: {
-            Authorization: "Bearer " + token,
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ context_uri: uri })
-    });
+    const response = await fetch(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+        {
+            method: "PUT",
+            headers: {
+                Authorization: "Bearer " + token,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ context_uri: uri })
+        }
+    );
 
     log("Lecture : " + uri + " / statut " + response.status);
+
+    if (response.status === 404) {
+        log("Erreur 404 : appareil non prêt. Relance Spotify sur la tablette, joue une musique quelques secondes, puis réessaie.");
+    }
 }
 
 async function pauseSpotify() {
