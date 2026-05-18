@@ -153,6 +153,9 @@ pre {
     <button class="btn-discret" onclick="toggleLogs()" title="Afficher/Masquer les logs">
     📄
     </button>
+    <button onclick="openSpotifyApp()" class="top-btn">
+  🎵 Spotify
+    </button>
     
 </div>
 
@@ -478,6 +481,25 @@ function toggleLogs() {
     } else {
         logElement.style.display = "none";
     }
+}
+
+    function openSpotifyApp() {
+  log("Ouverture de l'application Spotify...");
+
+  // URL deep link Spotify
+  const spotifyUrl = "spotify://";
+
+  // URL de votre interface HTML (à adapter)
+  const returnUrl = window.location.href;
+
+  // Ouvre Spotify
+  window.location.href = spotifyUrl;
+
+  // Au bout de 5 secondes, retour à l'interface
+  setTimeout(() => {
+    log("Retour à l'interface...");
+    window.location.href = returnUrl;
+  }, 5000);
 }
 
 </script>
