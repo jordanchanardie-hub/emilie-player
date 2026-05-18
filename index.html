@@ -460,6 +460,31 @@ function attendre(ms) {
 function cleImage(item) {
     return `image:${item.type}:${item.id}`;
 }
+
+async function setSpotifyVolume(volume) {
+  await fetch(`https://api.spotify.com/v1/me/player/volume?volume_percent=${volume}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    }
+  });
+}
+
+let volumeSpotify = 50;
+
+async function volumePlus() {
+  volumeSpotify = Math.min(100, volumeSpotify + 10);
+  await setSpotifyVolume(volumeSpotify);
+}
+
+async function volumeMoins() {
+  volumeSpotify = Math.max(0, volumeSpotify - 10);
+  await setSpotifyVolume(volumeSpotify);
+}
+
+<button onclick="volumeMoins()">🔉</button>
+<button onclick="volumePlus()">🔊</button>
+    
 </script>
 
 </body>
