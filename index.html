@@ -396,79 +396,44 @@ async function afficherContenus() {
     const grille = document.getElementById("grille");
     grille.innerHTML = "";
 
-    const images = {};
-
-    // Albums en une seule requête
-    const albums = contenus.filter(item => item.type === "album");
-    if (albums.length > 0) {
-        const ids = albums.map(item => item.id).join(",");
-        const response = await fetch(`https://api.spotify.com/v1/albums?ids=${ids}&market=FR`, {
-            headers: { Authorization: "Bearer " + token }
-        });
-
-        const data = await response.json();
-
-        if (data.albums) {
-            data.albums.forEach(album => {
-                if (album && album.images && album.images.length > 0) {
-                    images[`album:${album.id}`] = album.images[0].url;
-                }
-            });
-        }
-    }
-
-    // Shows en une seule requête
-    const shows = contenus.filter(item => item.type === "show");
-    if (shows.length > 0) {
-        const ids = shows.map(item => item.id).join(",");
-        const response = await fetch(`https://api.spotify.com/v1/shows?ids=${ids}&market=FR`, {
-            headers: { Authorization: "Bearer " + token }
-        });
-
-        const data = await response.json();
-
-        if (data.shows) {
-            data.shows.forEach(show => {
-                if (show && show.images && show.images.length > 0) {
-                    images[`show:${show.id}`] = show.images[0].url;
-                }
-            });
-        }
-    }
-
-    // Playlists une par une
-    const playlists = contenus.filter(item => item.type === "playlist");
-    for (const playlist of playlists) {
-        const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}?market=FR`, {
-            headers: { Authorization: "Bearer " + token }
-        });
-
-        const data = await response.json();
-
-        if (data.images && data.images.length > 0) {
-            images[`playlist:${playlist.id}`] = data.images[0].url;
-        }
-    }
-
-    // Affichage des cartes
     for (const item of contenus) {
         const bouton = document.createElement("button");
         bouton.className = "carte";
         bouton.onclick = () => lancerLecture(item.type, item.id);
 
-        const imageUrl = images[`${item.type}:${item.id}`];
+        try {
+            const response = await fetch(
+                `https://api.spotify.com/v1/${item.type}s/${item.id}?market=FR`,
+                {
+                    headers: { Authorization: "Bearer " + token }
+                }
+            );
 
-        if (imageUrl) {
-            bouton.innerHTML = `
-                <img src="${imageUrl}" alt="${item.titre}">
-            `;
-        } else {
-            bouton.innerHTML = `
-                <div class="fallback-carte">${item.titre}</div>
-            `;
+            const texte = await response.text();
+
+            if (!response.ok) {
+                log(`Erreur image ${item.titre} / statut ${response.status} : ${texte}`);
+                bouton.innerHTML = `<div class="fallback-carte">${item.titre}</div>`;
+            } else {
+                const data = JSON.parse(texte);
+                const imageUrl = data.images?.[0]?.url;
+
+                if (imageUrl) {
+                    bouton.innerHTML = `<img src="${imageUrl}" alt="${item.titre}">`;
+                } else {
+                    log(`Pas d'image trouvée pour ${item.titre}`);
+                    bouton.innerHTML = `<div class="fallback-carte">${item.titre}</div>`;
+                }
+            }
+        } catch (error) {
+            log(`Erreur affichage ${item.titre} : ${error.message}`);
+            bouton.innerHTML = `<div class="fallback-carte">${item.titre}</div>`;
         }
 
         grille.appendChild(bouton);
+
+        // évite de spammer Spotify
+        await attendre(400);
     }
 }
     
