@@ -150,13 +150,16 @@ pre {
     <button class="btn-discret" onclick="voirAppareils()" title="Voir appareils disponibles">
         ?
     </button>
+    <button class="btn-discret" onclick="toggleLogs()" title="Afficher/Masquer les logs">
+    📄
+    </button>
     
 </div>
 
 <div id="groupes-container"></div>
     
-<pre id="log"></pre>
-
+<pre id="log" style="display: none;"></pre>
+    
 <script>
 const CLIENT_ID = "cdfba9cd42fe48aea5e54607344126c6";
 const REDIRECT_URI = "https://jordanchanardie-hub.github.io/emilie-player/";
@@ -187,7 +190,9 @@ const groupes = [
 ];
     
 function log(message) {
-    document.getElementById("log").textContent += message + "\n";
+    const logElement = document.getElementById("log");
+    logElement.textContent += message + "\n";
+    logElement.scrollTop = logElement.scrollHeight;
 }
 
 function randomString(length) {
@@ -464,6 +469,17 @@ function attendre(ms) {
 function cleImage(item) {
     return `image:${item.type}:${item.id}`;
 }
+
+function toggleLogs() {
+    const logElement = document.getElementById("log");
+
+    if (logElement.style.display === "none") {
+        logElement.style.display = "block";
+    } else {
+        logElement.style.display = "none";
+    }
+}
+
 </script>
 
 </body>
