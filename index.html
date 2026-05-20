@@ -314,7 +314,7 @@ async function recupererImage(type, id, token) {
         return null;
     }
 
-    return data.images?.[0]?.url || null;
+    return data.images && data.images.length > 0 ? data.images[0].url : null;
 }
     
 function resetSpotify() {
@@ -447,7 +447,7 @@ async function afficherContenus() {
 
                 const data = await response.json();
 
-                if (response.ok && data.images?.[0]?.url) {
+                if (response.ok && data.images && data.images.length > 0 && data.images[0].url) {
                     localStorage.setItem(cle, data.images[0].url);
                     bouton.innerHTML = `<img src="${data.images[0].url}" alt="${item.titre}">`;
                 } else {
